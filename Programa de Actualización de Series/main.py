@@ -18,7 +18,7 @@ class Window(tk.Tk):
         self.title('Actualización de Series')
         self.resizable(False,False)
         
-        self.notebook = Notebook(self)#,style='lefttab.TNotebook')
+        self.notebook = Notebook(self)
         self.notebook.pack(expand=True,fill='both')
 
         self.tabs()
@@ -32,9 +32,10 @@ class Window(tk.Tk):
     def resize(self,event):
         selected = self.notebook.index(self.notebook.select())
         if selected == 0:
-            self.geometry('650x250')
+            width, heigth = [780,250]
         elif selected == 1:
-            self.geometry('420x250')
+            width, heigth = [530,250]
+        self.geometry(f"{width}x{heigth}+{self.winfo_screenwidth()//2-width//2}+{self.winfo_screenheight()//2-heigth//2}")
 
 if __name__ == '__main__':
     window = Window()
