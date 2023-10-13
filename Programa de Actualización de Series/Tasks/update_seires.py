@@ -1,6 +1,7 @@
 # Apartado que debe unir las series bases con el nuevo periodo
 
 import tkinter as tk
+import pandas as pd
 from tkinter.filedialog import askdirectory, askopenfilenames
 
 CENTER = {
@@ -137,7 +138,7 @@ class UpdateTab(tk.Frame):
         self.selected_items_msg_2.set('Se ha(n) seleccionado {} archivo(s)'.format(len(self.paths_2)))
     
     def search3(self):
-        self.dir3 = askdirectory()
+        self.out_dir = askdirectory()
     
     def close(self):
         self.window.destroy()
@@ -151,122 +152,41 @@ class UpdateTab(tk.Frame):
                      'Precipitación Acumulada [mm]','Precipitación incremental [mm]',
                      'Radiación [W/m2]','E.T. Acumulada [mm]','E.T. incrimental [mm]']
 
-        # ================================= Para estaciones de Albatroz ===================================
-
-        # -------------------------Hidrometeorológicas
-        ruta1 = j(base,'New Month\Encabezados',New_Month,'Albatros\Hidrometeorológicas')
-        ruta2 = j(base,Base_Months,'Hidrometeorológicas')
-        ruta3 = j(base,Output_folder,'Hidrometeorológicas')
-
-        paths1 = g(ruta1+'\\*.csv')
-        paths2 = g(ruta2+'\\*.csv')
-
-        for path in paths1:
-            columns = columnas_h   
+        for path in self.paths_1:
             name      = path.rsplit('\\',1)[-1]
-            base_file = list(filter(lambda x: name in x, paths2))[0]
+            base_file = list(filter(lambda x: name in x, self.paths_2))[0]
             df        = pd.read_csv(base_file,sep=',',encoding='utf-8',low_memory=False)
 
-            if df.shape[1] == 6:
-                columns = columnas_h[0:-1]
+            columns     = columns_h if df.shape[6] == 6 else \
+                          columns_h if self.base_type.get() == 0 else \
+                          columns_m
+            
             df.columns  = columns
 
             df['Fecha'] = pd.to_datetime(df['Fecha'])
             df2         = pd.read_csv(path,sep=',',encoding='utf-8',low_memory=False)
 
-            if df.shape[1] == 6:
-                df2 = df2.iloc[:,range(6)]
+            df2 = df2.iloc[:,range(6)] if df.shape[1] == 6 else df2
 
             df2.columns  = columns
             df2['Fecha'] = pd.to_datetime(df2['Fecha'])
+            
             df3          = pd.concat([df,df2])
-            df3.columns  = columns
-            df3.to_csv(ruta3+'\\'+name,index=False,encoding='utf-8')
-
-        # -------------------------Meteorológicas
-        ruta1 = j(base,'New Month\Encabezados',New_Month,'Albatros\Meteorológicas')
-        ruta2 = j(base,Base_Months,'Meteorológicas')
-        ruta3 = j(base,Output_folder,'Meteorológicas')
-
-        paths1=g(ruta1+'\\*.csv')
-        paths2=g(ruta2+'\\*.csv')
-
-        for path in paths1:
-            name         = path.rsplit('\\',1)[-1]
-            base_file    = list(filter(lambda x: name in x, paths2))[0]
-            df           = pd.read_csv(base_file,sep=',',encoding='utf-8',low_memory=False)
-            df.columns   = columnas_m
-            df['Fecha']  = pd.to_datetime(df['Fecha'])
-            df2          = pd.read_csv(path,sep=',',encoding='utf-8',low_memory=False)
-            df2.columns  = columnas_m
-            df2['Fecha'] = pd.to_datetime(df2['Fecha'])
-            df3          = pd.concat([df,df2])
-            df3.columns  = columnas_m
-            df3.to_csv(ruta3+'\\'+name,index=False,encoding='utf-8')
-
-        #  ============================== Para estaciones del CDIAC ======================================
-
-        # -------------------------Hidrometeorológicas
-
-        ruta1 = j(base,'New Month\Encabezados',New_Month,'CDIAC\Hidrometeorológicas')
-        ruta2 = j(base,Base_Months,'Hidrometeorológicas')
-        ruta3 = j(base,Output_folder,'Hidrometeorológicas')
-
-        paths1 = g(ruta1+'\\*.csv')
-        paths2 = g(ruta2+'\\*.csv')
-
-        for path in paths1:
-            columns   = columnas_h
-            name      = path.rsplit('\\',1)[-1]
-            base_file = list(filter(lambda x: name in x, paths2))[0]
-            df        = pd.read_csv(base_file,sep=',',encoding='utf-8',low_memory=False)
-            if df.shape[1] == 6:
-                columns = columnas_h[0:-1]
-            df.columns  = columns
-            df['Fecha'] = pd.to_datetime(df['Fecha'])
-            df2         = pd.read_csv(path,sep=',',encoding='utf-8',low_memory=False)
-            if df.shape[1] == 6:
-                df2 = df2.iloc[:,range(6)]
-            df2.columns = columns
-            df2['Fecha'] = pd.to_datetime(df2['Fecha'])
-            df3          = pd.concat([df,df2])
-            df3.columns  = columns
-            df3.to_csv(ruta3+'\\'+name,index=False,encoding='utf-8')
-
-        # ------------------------- Meteorológicas
-        ruta1 = j(base,'New Month\Encabezados',New_Month,'CDIAC\Meteorológicas')
-        ruta2 = j(base,Base_Months,'Meteorológicas')
-        ruta3 = j(base,Output_folder,'Meteorológicas')
-
-        paths1 = g(ruta1+'\\*.csv')
-        paths2 = g(ruta2+'\\*.csv')
-
-        for path in paths1:
-            name         = path.rsplit('\\',1)[-1]
-            base_file    = list(filter(lambda x: name in x, paths2))[0]
-            df           = pd.read_csv(base_file,sep=',',encoding='utf-8',low_memory=False)
-            df.columns   = columnas_m
-            df['Fecha']  = pd.to_datetime(df['Fecha'])
-            df2          = pd.read_csv(path,sep=',',encoding='utf-8',low_memory=False)
-            df2.columns  = columnas_m
-            df2['Fecha'] = pd.to_datetime(df2['Fecha'])
-            df3          = pd.concat([df,df2])
-            df3.columns  = columnas_m
-            df3.to_csv(ruta3+'\\'+name,index=False,encoding='utf-8')
+            df3.to_csv(self.out_dir+'\\'+name,index=False,encoding='utf-8')
 
         # ============================ Verificar las que faltan por actualizar ============================
 
-        dir0 = j(base,Base_Months)
-        dir1 = j(base,Output_folder)
-
-        paths         = g(j(dir0,'*','*.csv'))
-        paths_updated = g(j(dir1,'*','*.csv'))
-
-        for path in [path_updated.rsplit('\\',1)[-1].replace('.csv','') for path_updated in paths_updated]:
-            paths.remove(list(filter(lambda x: path in x, paths))[0])
-
-        for path in paths:
-            sh.copy(path,path.replace(Base_Months,Output_folder))
+       # dir0 = j(base,Base_Months)
+       # dir1 = j(base,Output_folder)
+#
+       # paths         = g(j(dir0,'*','*.csv'))
+       # paths_updated = g(j(dir1,'*','*.csv'))
+#
+       # for path in [path_updated.rsplit('\\',1)[-1].replace('.csv','') for path_updated in paths_updated]:
+       #     paths.remove(list(filter(lambda x: path in x, paths))[0])
+#
+       # for path in paths:
+       #     sh.copy(path,path.replace(Base_Months,Output_folder))
 
     def footer(self):
         tk.Label(self,text='Hecho por: Franklin Andrés Lizarazo Muñoz').pack(**CENTER)
