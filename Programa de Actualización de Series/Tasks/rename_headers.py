@@ -26,6 +26,7 @@ TITLE = {
 class RenameTab(tk.Frame):
     def __init__(self,window):
         super().__init__()
+        self.window = window
         window.notebook.add(self, text = '1. Renombrar Encabezados')
         self.serie_type = tk.IntVar()
         self.base_type  = tk.IntVar()
@@ -42,7 +43,7 @@ class RenameTab(tk.Frame):
     def body(self):
          
         container = tk.Frame(self)
-        container.pack(padx=20,pady=[0, 10],**CENTER)
+        container.pack(padx=[20, 0],pady=[0, 10],**CENTER)
 
         tk.Label(
             container, 
@@ -105,6 +106,15 @@ class RenameTab(tk.Frame):
             text = 'Ejecutar',
             command=lambda: self.new_Thread(self.run)
         ).grid(row=4,column=0,columnspan=3,sticky='nsew')
+
+        tk.Button(
+            container,
+            text    = 'Cerrar',
+            command = self.close
+        ).grid(row = 5,column=0,columnspan=3,sticky='nsew')
+    
+    def close(self):
+        self.window.destroy()
     
     def footer(self):
         tk.Label(self,text='Hecho por: Franklin Andrés Lizarazo Muñoz').pack(**CENTER)

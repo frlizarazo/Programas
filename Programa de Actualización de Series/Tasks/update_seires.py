@@ -1,7 +1,7 @@
 # Apartado que debe unir las series bases con el nuevo periodo
 
 import tkinter as tk
-from tkinter.filedialog import askdirectory
+from tkinter.filedialog import askdirectory, askopenfilenames
 
 CENTER = {
     'fill'   : 'both',
@@ -14,7 +14,14 @@ TITLE = {
 class UpdateTab(tk.Frame):
     def __init__(self,window):
         super().__init__()
+        self.window = window
         window.notebook.add(self, text = '2. Actualizar las Series')
+        self.serie_type = tk.IntVar()
+        self.base_type = tk.IntVar()
+        self.selected_items_msg_1 = tk.StringVar()
+        self.selected_items_msg_2 = tk.StringVar()
+        self.selected_items_msg_1.set('Se han seleccionado 0 archivos')
+        self.selected_items_msg_2.set('Se han seleccionado 0 archivos')
 
         self.header()
         self.body()
@@ -25,55 +32,115 @@ class UpdateTab(tk.Frame):
         
     def body(self):
         container = tk.Frame(self)
-        container.pack(padx=20,pady=[0, 10],**CENTER)
+        container.pack(padx=[20, 0],pady=[0, 10],**CENTER)
+
+        tk.Label(
+            container, 
+            text = '1. Seleccione con que tipo de serie de datos esta trabajando'
+        ).grid(row=1,column=0,sticky='w')
+
+        tk.Radiobutton(
+            container,
+            text='Albatros',
+            variable=self.serie_type,
+            value=0
+        ).grid(row = 1,column = 1, sticky = 'w')
+        
+        tk.Radiobutton(
+            container,
+            text='Cdiac',
+            variable=self.serie_type,
+            value=1
+        ).grid(row = 1,column = 2, sticky = 'w')
+
+
+        tk.Label(
+            container,
+            text = '2. Seleccione las variables que contiene la serie base'
+        ).grid(row=2,column=0,sticky = 'w')
+
+        tk.Radiobutton(
+            container,
+            text='Hidrometeorológicas',
+            variable=self.base_type,
+            value=0
+        ).grid(row = 2,column = 1, sticky = 'w')
+
+        tk.Radiobutton(
+            container,
+            text='Meteorológicas',
+            variable=self.base_type,
+            value=1
+        ).grid(row = 2,column = 2, sticky = 'w')
 
         tk.Label(
             container,
             text = 'Selecciona la carpeta que contiene los archivos base: '
-        ).grid(row = 0,column = 0, sticky = 'w')
+        ).grid(row = 3,column = 0, sticky = 'w')
+
+        tk.Label(
+            container,
+            textvariable = self.selected_items_msg_1
+        ).grid(row = 3,column = 1, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
-            command = ...
-        ).grid(row = 0,column = 1, sticky = 'nsew')
+            command = self.search1
+        ).grid(row = 3,column = 2, sticky = 'nsew')
 
         tk.Label(
             container,
             text = 'Selecciona la carpeta que contiene los archivos adicionales: '
-        ).grid(row = 1,column = 0, sticky = 'w')
+        ).grid(row = 4,column = 0, sticky = 'w')
+
+        tk.Label(
+            container,
+            textvariable = self.selected_items_msg_2
+        ).grid(row = 4,column = 1, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
-            command = ...
-        ).grid(row = 1,column = 1, sticky = 'nsew')
+            command = self.search2
+        ).grid(row = 4,column = 2, sticky = 'nsew')
 
         tk.Label(
             container,
             text='Selecciona la carpeta donde guardar los resultados: '
-        ).grid(row = 2,column = 0, sticky = 'w')
+        ).grid(row = 5,column = 0, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
-            command = ...
-        ).grid(row = 2,column = 1, sticky = 'nsew')
+            command = self.search3
+        ).grid(row = 5,column = 1, columnspan=2, sticky = 'nsew')
 
         tk.Button(
             container,
             text    = 'Ejecutar',
             command = ...
-        ).grid(row=4,column=0,columnspan=2,sticky='nsew')
+        ).grid(row = 6,column=0,columnspan=3,sticky='nsew')
+
+        tk.Button(
+            container,
+            text    = 'Cerrar',
+            command = self.close
+        ).grid(row = 7,column=0,columnspan=3,sticky='nsew')
 
     def search1(self):
-        self.dir1 = askdirectory()
+        self.paths_1 = askopenfilenames(filetypes=(('Archivos CSV','*.csv'),))
+        self.selected_items_msg_1.set('Se ha(n) seleccionado {} archivo(s)'.format(len(self.paths_1)))
 
     def search2(self):
-        self.dir2 = askdirectory()
+        self.paths_2 = askopenfilenames(filetypes=(('Archivos CSV','*.csv'),))
+        self.selected_items_msg_2.set('Se ha(n) seleccionado {} archivo(s)'.format(len(self.paths_2)))
     
     def search3(self):
         self.dir3 = askdirectory()
+    
+    def close(self):
+        self.window.destroy()
     
     def run(self):
         columns_h = ['Fecha','Hora','Temperatura [°C]','Precipitación Acumulada [mm]',

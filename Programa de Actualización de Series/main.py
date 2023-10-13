@@ -34,7 +34,7 @@ class Window(tk.Tk):
         if selected == 0:
             width, heigth = [780,250]
         elif selected == 1:
-            width, heigth = [530,250]
+            width, heigth = [780,280]
         self.geometry(f"{width}x{heigth}+{self.winfo_screenwidth()//2-width//2}+{self.winfo_screenheight()//2-heigth//2}")
 
 if __name__ == '__main__':
