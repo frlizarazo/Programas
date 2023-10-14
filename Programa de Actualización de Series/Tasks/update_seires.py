@@ -1,8 +1,11 @@
 # Apartado que debe unir las series bases con el nuevo periodo
 
 import tkinter as tk
-import pandas as pd
-from tkinter.filedialog import askdirectory, askopenfilenames
+import pandas  as pd
+import shutil  as sh
+from   glob               import glob
+from   threading          import Thread
+from   tkinter.filedialog import askdirectory, askopenfilenames
 
 CENTER = {
     'fill'   : 'both',
@@ -17,7 +20,6 @@ class UpdateTab(tk.Frame):
         super().__init__()
         self.window = window
         window.notebook.add(self, text = '2. Actualizar las Series')
-        self.serie_type = tk.IntVar()
         self.base_type = tk.IntVar()
         self.selected_items_msg_1 = tk.StringVar()
         self.selected_items_msg_2 = tk.StringVar()
@@ -36,98 +38,84 @@ class UpdateTab(tk.Frame):
         container.pack(padx=[20, 0],pady=[0, 10],**CENTER)
 
         tk.Label(
-            container, 
-            text = '1. Seleccione con que tipo de serie de datos esta trabajando'
-        ).grid(row=1,column=0,sticky='w')
-
-        tk.Radiobutton(
             container,
-            text='Albatros',
-            variable=self.serie_type,
-            value=0
-        ).grid(row = 1,column = 1, sticky = 'w')
-        
-        tk.Radiobutton(
-            container,
-            text='Cdiac',
-            variable=self.serie_type,
-            value=1
-        ).grid(row = 1,column = 2, sticky = 'w')
-
-
-        tk.Label(
-            container,
-            text = '2. Seleccione las variables que contiene la serie base'
-        ).grid(row=2,column=0,sticky = 'w')
+            text = '1. Seleccione las variables que contiene la serie base'
+        ).grid(row = 0,column=0,sticky = 'w')
 
         tk.Radiobutton(
             container,
             text='Hidrometeorológicas',
             variable=self.base_type,
-            value=0
-        ).grid(row = 2,column = 1, sticky = 'w')
+            value = 0
+        ).grid(row = 0,column = 1, sticky = 'w')
 
         tk.Radiobutton(
             container,
             text='Meteorológicas',
             variable=self.base_type,
             value=1
-        ).grid(row = 2,column = 2, sticky = 'w')
+        ).grid(row = 0,column = 2, sticky = 'w')
 
         tk.Label(
             container,
-            text = 'Selecciona la carpeta que contiene los archivos base: '
-        ).grid(row = 3,column = 0, sticky = 'w')
+            text = '2. Selecciona la carpeta que contiene los archivos base: '
+        ).grid(row = 1,column = 0, sticky = 'w')
 
         tk.Label(
             container,
             textvariable = self.selected_items_msg_1
-        ).grid(row = 3,column = 1, sticky = 'w')
+        ).grid(row = 1,column = 1, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
             command = self.search1
-        ).grid(row = 3,column = 2, sticky = 'nsew')
+        ).grid(row = 1,column = 2, sticky = 'nsew')
 
         tk.Label(
             container,
-            text = 'Selecciona la carpeta que contiene los archivos adicionales: '
-        ).grid(row = 4,column = 0, sticky = 'w')
+            text = '3. Selecciona la carpeta que contiene los archivos adicionales: '
+        ).grid(row = 2,column = 0, sticky = 'w')
 
         tk.Label(
             container,
             textvariable = self.selected_items_msg_2
-        ).grid(row = 4,column = 1, sticky = 'w')
+        ).grid(row = 2,column = 1, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
             command = self.search2
-        ).grid(row = 4,column = 2, sticky = 'nsew')
+        ).grid(row = 2,column = 2, sticky = 'nsew')
 
         tk.Label(
             container,
-            text='Selecciona la carpeta donde guardar los resultados: '
-        ).grid(row = 5,column = 0, sticky = 'w')
+            text='4. Selecciona la carpeta donde guardar los resultados: '
+        ).grid(row = 3,column = 0, sticky = 'w')
 
         tk.Button(
             container,
             text    = 'Buscar',
             command = self.search3
-        ).grid(row = 5,column = 1, columnspan=2, sticky = 'nsew')
+        ).grid(row = 3,column = 1, columnspan=2, sticky = 'nsew')
 
         tk.Button(
             container,
             text    = 'Ejecutar',
-            command = ...
-        ).grid(row = 6,column=0,columnspan=3,sticky='nsew')
+            command = lambda: self.new_Thread(self.run)
+        ).grid(row = 4,column=0,columnspan=3,sticky='nsew')
+
+        tk.Button(
+            container,
+            text    = 'Completar',
+            command = self.complete
+        ).grid(row = 4,column=0,columnspan=3,sticky='nsew')
 
         tk.Button(
             container,
             text    = 'Cerrar',
             command = self.close
-        ).grid(row = 7,column=0,columnspan=3,sticky='nsew')
+        ).grid(row = 6,column=0,columnspan=3,sticky='nsew')
 
     def search1(self):
         self.paths_1 = askopenfilenames(filetypes=(('Archivos CSV','*.csv'),))
@@ -142,6 +130,10 @@ class UpdateTab(tk.Frame):
     
     def close(self):
         self.window.destroy()
+
+    def new_Thread(self,function):
+        thread = Thread(target=function)
+        thread.start()
     
     def run(self):
         columns_h = ['Fecha','Hora','Temperatura [°C]','Precipitación Acumulada [mm]',
@@ -174,19 +166,15 @@ class UpdateTab(tk.Frame):
             df3          = pd.concat([df,df2])
             df3.to_csv(self.out_dir+'\\'+name,index=False,encoding='utf-8')
 
-        # ============================ Verificar las que faltan por actualizar ============================
+    def complete(self):
 
-       # dir0 = j(base,Base_Months)
-       # dir1 = j(base,Output_folder)
-#
-       # paths         = g(j(dir0,'*','*.csv'))
-       # paths_updated = g(j(dir1,'*','*.csv'))
-#
-       # for path in [path_updated.rsplit('\\',1)[-1].replace('.csv','') for path_updated in paths_updated]:
-       #     paths.remove(list(filter(lambda x: path in x, paths))[0])
-#
-       # for path in paths:
-       #     sh.copy(path,path.replace(Base_Months,Output_folder))
+        paths_updated = glob(self.out_dir + '\\*.csv')
+
+        for path in [path_updated.rsplit('\\',1)[-1].replace('.csv','') for path_updated in paths_updated]:
+            self.paths_1.remove(list(filter(lambda x: path in x, self.paths_1))[0])
+
+        for path in self.paths_1:
+            sh.copy(path,self.out_dir + path.rsplit('\\',1)[-1])
 
     def footer(self):
         tk.Label(self,text='Hecho por: Franklin Andrés Lizarazo Muñoz').pack(**CENTER)

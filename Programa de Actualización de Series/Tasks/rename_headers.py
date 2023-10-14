@@ -10,9 +10,9 @@
 # ================================================================================================
 
 import tkinter as tk
-import pandas as pd
-from threading import Thread
-from tkinter.filedialog import askopenfilenames
+import pandas  as pd
+from   threading          import Thread
+from   tkinter.filedialog import askopenfilenames
 
 CENTER = {
     'fill'   : 'both',
